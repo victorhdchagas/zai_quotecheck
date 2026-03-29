@@ -1,3 +1,7 @@
+// zai-keycheck - Z.AI quota checker for GLM Coding Plan
+// Version: 1.0.0
+// Author: Victor Chagas <wutachi@gmail.com>
+
 package main
 
 import (
@@ -12,6 +16,8 @@ import (
 	"strings"
 	"time"
 )
+
+const version = "1.0.0"
 
 type Provider struct {
 	URL         string `json:"url"`
@@ -58,6 +64,7 @@ func main() {
 	help := flag.Bool("help", false, "Mostra esta ajuda")
 	configPath := flag.String("config", "", "Caminho do arquivo de configuração")
 	encodeKey := flag.String("encode", "", "Codifica uma API key para base64")
+	initConfig := flag.Bool("init", false, "Cria arquivo de configuração de exemplo")
 
 	flag.Parse()
 
@@ -69,6 +76,11 @@ func main() {
 
 	if *help {
 		printHelp()
+		return
+	}
+
+	if *initConfig {
+		createExampleConfig()
 		return
 	}
 
@@ -90,7 +102,7 @@ func main() {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erro ao ler %s: %v\n", filePath, err)
-		fmt.Fprintf(os.Stderr, "\nUse --config para especificar outro caminho, ou copie seu providers.json para %s\n", filePath)
+		fmt.Fprintf(os.Stderr, "\nUse --init para criar arquivo de exemplo, ou --config para especificar outro caminho.\n")
 		os.Exit(1)
 	}
 
@@ -161,18 +173,70 @@ func main() {
 	}
 }
 
+func createExampleConfig() {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao obter diretório de config: %v\n", err)
+		os.Exit(1)
+	}
+	appDir := filepath.Join(configDir, "zai-keycheck")
+	if err := os.MkdirAll(appDir, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao criar diretório %s: %v\n", appDir, err)
+		os.Exit(1)
+	}
+	filePath := filepath.Join(appDir, "providers.json")
+
+	if _, err := os.Stat(filePath); err == nil {
+		fmt.Printf("Arquivo de configuração já existe em: %s\n", filePath)
+		fmt.Println("Para recriar, apague o arquivo primeiro ou use --config para especificar outro caminho.")
+		return
+	}
+
+	exampleConfig := Config{
+		APIKeyBase64: "",
+		Providers: []Provider{
+			{
+				URL:         "https://api.z.ai/api/monitor/usage/quota/limit",
+				AvailableAt: "",
+				LastAttempt: "",
+			},
+		},
+	}
+
+	out, err := json.MarshalIndent(exampleConfig, "", "  ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao criar config: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := os.WriteFile(filePath, out, 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao salvar config: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("✅ Arquivo de configuração criado: %s\n", filePath)
+	fmt.Println("\nPróximos passos:")
+	fmt.Println("  1. Encode sua API key: zai-keycheck --encode SUA_API_KEY")
+	fmt.Println("  2. Edite o arquivo e adicione em api_key ou api_key_base64")
+	fmt.Println("  3. Execute: zai-keycheck")
+}
+
 func printHelp() {
-	fmt.Println("zai-keycheck - Verificador de quota Z.AI para GLM Coding Plan\n")
-	fmt.Println("USO:")
+	fmt.Printf("zai-keycheck v%s - Verificador de quota Z.AI para GLM Coding Plan\n", version)
+	fmt.Println("\nUSO:")
 	fmt.Println("  zai-keycheck [opções]\n")
 	fmt.Println("OPÇÕES:")
 	fmt.Println("  -config string")
 	fmt.Println("      Caminho do arquivo de configuração (padrão: ~/.config/zai-keycheck/providers.json)")
 	fmt.Println("  -encode string")
 	fmt.Println("      Codifica uma API key em base64")
+	fmt.Println("  -init")
+	fmt.Println("      Cria arquivo de configuração de exemplo")
 	fmt.Println("  -help")
 	fmt.Println("      Mostra esta ajuda\n")
 	fmt.Println("SUBCOMANDOS:")
+	fmt.Println("  zai-keycheck --init")
+	fmt.Println("      Cria arquivo de configuração padrão em ~/.config/zai-keycheck/providers.json")
 	fmt.Println("  zai-keycheck --encode SUA_API_KEY")
 	fmt.Println("      Codifica a API key em base64 para usar no config (mais seguro)\n")
 	fmt.Println("ARQUIVO DE CONFIGURAÇÃO:")
@@ -189,6 +253,7 @@ func printHelp() {
   ]
 }`)
 	fmt.Println("\nEXEMPLOS:")
+	fmt.Println("  zai-keycheck --init")
 	fmt.Println("  zai-keycheck --encode sk-sua-chave-aqui")
 	fmt.Println("  zai-keycheck")
 	fmt.Println("  zai-keycheck --config ./meu-config.json")

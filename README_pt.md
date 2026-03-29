@@ -15,6 +15,8 @@ Monitora sua quota da API Z.AI, verificando o uso de TIME_LIMIT e TOKENS_LIMIT c
 - ✅ API key em base64 para segurança (opcional)
 - ✅ Atualiza automaticamente `last_attempt` no config
 - ✅ Configuração padrão em `~/.config/zai-keycheck/`
+- ✅ Comando `--init` para criação rápida de config
+- ✅ Suporte a Docker
 
 ## Instalação
 
@@ -33,9 +35,33 @@ go build
 mv zai-keycheck ~/.local/bin/  # ou ~/go/bin/
 ```
 
+### Via Docker
+
+```bash
+docker run --rm \
+  -v ~/.config/zai-keycheck:/root/.config/zai-keycheck \
+  -e TZ=America/Sao_Paulo \
+  victorhdchagas/zai-keycheck:latest
+```
+
+Ou usando docker-compose:
+```bash
+docker-compose run --rm zai-keycheck
+```
+
 ## Uso
 
 ### Primeiro uso
+
+**Opção 1: Usar --init (recomendado)**
+
+```bash
+zai-keycheck --init
+```
+
+Isso cria um arquivo de configuração de exemplo em `~/.config/zai-keycheck/providers.json`.
+
+**Opção 2: Manualmente**
 
 1. Encode sua API key em base64:
 ```bash
@@ -93,6 +119,29 @@ zai-keycheck --help             # mostra ajuda
       🔄 Reseta em: 3h 58m 14s (29/03/2026 10:32:59)
 
 📁 Config atualizado: /home/wutachi/.config/zai-keycheck/providers.json
+```
+
+## Docker
+
+### Build
+
+```bash
+docker build -t zai-keycheck .
+```
+
+### Executar
+
+```bash
+docker run --rm \
+  -v ~/.config/zai-keycheck:/root/.config/zai-keycheck \
+  -e TZ=America/Sao_Paulo \
+  zai-keycheck
+```
+
+### Docker Compose
+
+```bash
+docker-compose run --rm zai-keycheck
 ```
 
 ## Segurança

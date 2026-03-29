@@ -1,0 +1,11 @@
+{
+  "api_key_base64": "",
+  "api_key": "",
+  "providers": [
+    {
+      "url": "https://api.z.ai/api/monitor/usage/quota/limit",
+      "available_at": "",
+      "last_attempt": ""
+    }
+  ]
+}

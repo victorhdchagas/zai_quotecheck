@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  zai-keycheck:
+    build: .
+    image: victorhdchagas/zai-keycheck:latest
+    container_name: zai-keycheck
+    volumes:
+      - ${HOME}/.config/zai-keycheck:/root/.config/zai-keycheck
+    environment:
+      - TZ=America/Sao_Paulo
