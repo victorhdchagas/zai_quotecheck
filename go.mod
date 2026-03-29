@@ -1,3 +1,3 @@
-module zai-keycheck
+module zai_quotecheck
 
 go 1.26.1

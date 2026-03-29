@@ -1,4 +1,4 @@
-// zai-keycheck - Z.AI quota checker for GLM Coding Plan
+// zai_quotecheck - Z.AI quota checker for GLM Coding Plan
 // Version: 1.0.0
 // Author: Victor Chagas <wutachi@gmail.com>
 
@@ -68,7 +68,7 @@ func getConfigPath() string {
 			fmt.Fprintf(os.Stderr, "Erro ao obter diretório de config: %v\n", err)
 			os.Exit(1)
 		}
-		appDir := filepath.Join(configDir, "zai-keycheck")
+		appDir := filepath.Join(configDir, "zai_quotecheck")
 		if err := os.MkdirAll(appDir, 0755); err != nil {
 			fmt.Fprintf(os.Stderr, "Erro ao criar diretório %s: %v\n", appDir, err)
 			os.Exit(1)
@@ -177,7 +177,7 @@ func main() {
 
 	if apiKey == "" {
 		fmt.Fprintln(os.Stderr, "api_key ou api_key_base64 não definida no JSON.")
-		fmt.Fprintln(os.Stderr, "Use: zai-keycheck --encode SUA_API_KEY")
+		fmt.Fprintln(os.Stderr, "Use: zai_quotecheck --encode SUA_API_KEY")
 		os.Exit(1)
 	}
 
@@ -234,7 +234,7 @@ func createExampleConfig() {
 		fmt.Fprintf(os.Stderr, "Erro ao obter diretório de config: %v\n", err)
 		os.Exit(1)
 	}
-	appDir := filepath.Join(configDir, "zai-keycheck")
+	appDir := filepath.Join(configDir, "zai_quotecheck")
 	if err := os.MkdirAll(appDir, 0755); err != nil {
 		fmt.Fprintf(os.Stderr, "Erro ao criar diretório %s: %v\n", appDir, err)
 		os.Exit(1)
@@ -265,17 +265,17 @@ func createExampleConfig() {
 
 	fmt.Printf("✅ Arquivo de configuração criado: %s\n", filePath)
 	fmt.Println("\nPróximos passos:")
-	fmt.Println("  1. Encode sua API key: zai-keycheck --encode SUA_API_KEY")
-	fmt.Println("  2. Execute: zai-keycheck")
+	fmt.Println("  1. Encode sua API key: zai_quotecheck --encode SUA_API_KEY")
+	fmt.Println("  2. Execute: zai_quotecheck")
 }
 
 func printHelp() {
-	fmt.Printf("zai-keycheck v%s - Verificador de quota Z.AI para GLM Coding Plan\n", version)
+	fmt.Printf("zai_quotecheck v%s - Verificador de quota Z.AI para GLM Coding Plan\n", version)
 	fmt.Println("\nUSO:")
-	fmt.Println("  zai-keycheck [opções]\n")
+	fmt.Println("  zai_quotecheck [opções]\n")
 	fmt.Println("OPÇÕES:")
 	fmt.Println("  -config string")
-	fmt.Println("      Caminho do arquivo de configuração (padrão: ~/.config/zai-keycheck/providers.json)")
+	fmt.Println("      Caminho do arquivo de configuração (padrão: ~/.config/zai_quotecheck/providers.json)")
 	fmt.Println("  -encode string")
 	fmt.Println("      Codifica uma API key e salva na config")
 	fmt.Println("  -init")
@@ -283,12 +283,12 @@ func printHelp() {
 	fmt.Println("  -help")
 	fmt.Println("      Mostra esta ajuda\n")
 	fmt.Println("SUBCOMANDOS:")
-	fmt.Println("  zai-keycheck --init")
-	fmt.Println("      Cria arquivo de configuração padrão em ~/.config/zai-keycheck/providers.json")
-	fmt.Println("  zai-keycheck --encode SUA_API_KEY")
+	fmt.Println("  zai_quotecheck --init")
+	fmt.Println("      Cria arquivo de configuração padrão em ~/.config/zai_quotecheck/providers.json")
+	fmt.Println("  zai_quotecheck --encode SUA_API_KEY")
 	fmt.Println("      Codifica a API key em base64 e salva no arquivo de config\n")
 	fmt.Println("ARQUIVO DE CONFIGURAÇÃO:")
-	fmt.Println("  Padrão: ~/.config/zai-keycheck/providers.json")
+	fmt.Println("  Padrão: ~/.config/zai_quotecheck/providers.json")
 	fmt.Println("  Use api_key (texto) ou api_key_base64 (codificado):")
 	fmt.Println(`{
   "api_key_base64": "MTQ5NjNiYjMzMWI4NGJkNzg0ZTcxYWM3NzMxY2MzNzEuVm05bEF2Y1ZrZldVTGhoYw==",
@@ -301,10 +301,10 @@ func printHelp() {
   ]
 }`)
 	fmt.Println("\nEXEMPLOS:")
-	fmt.Println("  zai-keycheck --init")
-	fmt.Println("  zai-keycheck --encode sk-sua-chave-aqui")
-	fmt.Println("  zai-keycheck")
-	fmt.Println("  zai-keycheck --config ./meu-config.json")
+	fmt.Println("  zai_quotecheck --init")
+	fmt.Println("  zai_quotecheck --encode sk-sua-chave-aqui")
+	fmt.Println("  zai_quotecheck")
+	fmt.Println("  zai_quotecheck --config ./meu-config.json")
 }
 
 func printLimit(limit Limit, loc *time.Location, now time.Time) {

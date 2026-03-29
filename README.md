@@ -1,4 +1,4 @@
-# zai-keycheck
+# zai_quotecheck
 
 Z.AI quota checker for GLM Coding Plan.
 
@@ -14,7 +14,7 @@ Monitors your Z.AI API quota, checking TIME_LIMIT and TOKENS_LIMIT usage with au
 - ✅ Multiple providers in same config file
 - ✅ Base64 API key for security (optional)
 - ✅ Automatically updates `last_attempt` in config
-- ✅ Default config location: `~/.config/zai-keycheck/`
+- ✅ Default config location: `~/.config/zai_quotecheck/`
 - ✅ `--init` command for quick config creation
 - ✅ Docker support
 
@@ -23,30 +23,30 @@ Monitors your Z.AI API quota, checking TIME_LIMIT and TOKENS_LIMIT usage with au
 ### Via Go (recommended)
 
 ```bash
-go install github.com/victorhdchagas/zai-keycheck@latest
+go install github.com/victorhdchagas/zai_quotecheck@latest
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/victorhdchagas/zai-keycheck.git
-cd zai-keycheck
+git clone https://github.com/victorhdchagas/zai_quotecheck.git
+cd zai_quotecheck
 go build
-mv zai-keycheck ~/.local/bin/  # or ~/go/bin/
+mv zai_quotecheck ~/.local/bin/  # or ~/go/bin/
 ```
 
 ### Via Docker
 
 ```bash
 docker run --rm \
-  -v ~/.config/zai-keycheck:/root/.config/zai-keycheck \
+  -v ~/.config/zai_quotecheck:/root/.config/zai_quotecheck \
   -e TZ=America/Sao_Paulo \
-  victorhdchagas/zai-keycheck:latest
+  victorhdchagas/zai_quotecheck:latest
 ```
 
 Or using docker-compose:
 ```bash
-docker-compose run --rm zai-keycheck
+docker-compose run --rm zai_quotecheck
 ```
 
 ## Usage
@@ -56,18 +56,18 @@ docker-compose run --rm zai-keycheck
 **Option 1: Use --encode (recommended)**
 
 ```bash
-zai-keycheck --encode YOUR_API_KEY
+zai_quotecheck --encode YOUR_API_KEY
 ```
 
-This encodes your API key in base64 and saves it directly to the config file at `~/.config/zai-keycheck/providers.json`.
+This encodes your API key in base64 and saves it directly to the config file at `~/.config/zai_quotecheck/providers.json`.
 
 **Option 2: Use --init**
 
 ```bash
-zai-keycheck --init
+zai_quotecheck --init
 ```
 
-This creates an example config file at `~/.config/zai-keycheck/providers.json`.
+This creates an example config file at `~/.config/zai_quotecheck/providers.json`.
 
 For manual editing, the config supports `api_key` (plain text) or `api_key_base64` (base64 encoded).
 ```
@@ -75,9 +75,9 @@ For manual editing, the config supports `api_key` (plain text) or `api_key_base6
 ### Check quota
 
 ```bash
-zai-keycheck                    # uses default config
-zai-keycheck -c ./config.json  # uses custom file
-zai-keycheck --help             # shows help
+zai_quotecheck                    # uses default config
+zai_quotecheck -c ./config.json  # uses custom file
+zai_quotecheck --help             # shows help
 ```
 
 ### Example output
@@ -99,7 +99,7 @@ zai-keycheck --help             # shows help
       Usage: 1%
       🔄 Resets in: 3h 58m 14s (29/03/2026 10:32:59)
 
-📁 Config updated: /home/user/.config/zai-keycheck/providers.json
+📁 Config updated: /home/user/.config/zai_quotecheck/providers.json
 ```
 
 ## Docker
@@ -107,22 +107,22 @@ zai-keycheck --help             # shows help
 ### Build
 
 ```bash
-docker build -t zai-keycheck .
+docker build -t zai_quotecheck .
 ```
 
 ### Run
 
 ```bash
 docker run --rm \
-  -v ~/.config/zai-keycheck:/root/.config/zai-keycheck \
+  -v ~/.config/zai_quotecheck:/root/.config/zai_quotecheck \
   -e TZ=America/Sao_Paulo \
-  zai-keycheck
+  zai_quotecheck
 ```
 
 ### Docker Compose
 
 ```bash
-docker-compose run --rm zai-keycheck
+docker-compose run --rm zai_quotecheck
 ```
 
 ## Security
