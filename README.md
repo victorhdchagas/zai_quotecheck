@@ -53,7 +53,15 @@ docker-compose run --rm zai-keycheck
 
 ### First time setup
 
-**Option 1: Use --init (recommended)**
+**Option 1: Use --encode (recommended)**
+
+```bash
+zai-keycheck --encode YOUR_API_KEY
+```
+
+This encodes your API key in base64 and saves it directly to the config file at `~/.config/zai-keycheck/providers.json`.
+
+**Option 2: Use --init**
 
 ```bash
 zai-keycheck --init
@@ -61,34 +69,7 @@ zai-keycheck --init
 
 This creates an example config file at `~/.config/zai-keycheck/providers.json`.
 
-**Option 2: Manually**
-
-1. Encode your API key in base64:
-```bash
-zai-keycheck --encode YOUR_API_KEY
-```
-
-2. Create config file at `~/.config/zai-keycheck/providers.json`:
-
-```json
-{
-  "api_key_base64": "your-base64-encoded-key",
-  "providers": [
-    {
-      "url": "https://api.z.ai/api/monitor/usage/quota/limit",
-      "available_at": "",
-      "last_attempt": ""
-    }
-  ]
-}
-```
-
-Or use plain `api_key`:
-```json
-{
-  "api_key": "sk-your-key-here",
-  "providers": [...]
-}
+For manual editing, the config supports `api_key` (plain text) or `api_key_base64` (base64 encoded).
 ```
 
 ### Check quota

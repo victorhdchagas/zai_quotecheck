@@ -60,17 +60,89 @@ type UsageDetail struct {
 	Usage     int    `json:"usage"`
 }
 
+func getConfigPath() string {
+	configPath := *flag.String("config", "", "Caminho do arquivo de configuração")
+	if configPath == "" {
+		configDir, err := os.UserConfigDir()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Erro ao obter diretório de config: %v\n", err)
+			os.Exit(1)
+		}
+		appDir := filepath.Join(configDir, "zai-keycheck")
+		if err := os.MkdirAll(appDir, 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "Erro ao criar diretório %s: %v\n", appDir, err)
+			os.Exit(1)
+		}
+		return filepath.Join(appDir, "providers.json")
+	}
+	return configPath
+}
+
+func loadConfig(filePath string) (*Config, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return &Config{
+				APIKeyBase64: "",
+				Providers: []Provider{
+					{
+						URL:         "https://api.z.ai/api/monitor/usage/quota/limit",
+						AvailableAt: "",
+						LastAttempt: "",
+					},
+				},
+			}, nil
+		}
+		return nil, err
+	}
+
+	var config Config
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
+}
+
+func saveConfig(filePath string, config *Config) error {
+	out, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filePath, out, 0644)
+}
+
+func encodeToConfig(key string) {
+	filePath := getConfigPath()
+
+	config, err := loadConfig(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao ler config: %v\n", err)
+		os.Exit(1)
+	}
+
+	encoded := base64.StdEncoding.EncodeToString([]byte(key))
+	config.APIKeyBase64 = encoded
+	config.APIKey = ""
+
+	if err := saveConfig(filePath, config); err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao salvar config: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("✅ API key codificada e salva em: %s\n", filePath)
+	fmt.Printf("   Base64: %s\n", encoded)
+}
+
 func main() {
 	help := flag.Bool("help", false, "Mostra esta ajuda")
-	configPath := flag.String("config", "", "Caminho do arquivo de configuração")
-	encodeKey := flag.String("encode", "", "Codifica uma API key para base64")
+	encodeKey := flag.String("encode", "", "Codifica uma API key e salva na config")
 	initConfig := flag.Bool("init", false, "Cria arquivo de configuração de exemplo")
 
 	flag.Parse()
 
 	if *encodeKey != "" {
-		encoded := base64.StdEncoding.EncodeToString([]byte(*encodeKey))
-		fmt.Printf("%s\n", encoded)
+		encodeToConfig(*encodeKey)
 		return
 	}
 
@@ -84,31 +156,12 @@ func main() {
 		return
 	}
 
-	filePath := *configPath
-	if filePath == "" {
-		configDir, err := os.UserConfigDir()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao obter diretório de config: %v\n", err)
-			os.Exit(1)
-		}
-		appDir := filepath.Join(configDir, "zai-keycheck")
-		if err := os.MkdirAll(appDir, 0755); err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao criar diretório %s: %v\n", appDir, err)
-			os.Exit(1)
-		}
-		filePath = filepath.Join(appDir, "providers.json")
-	}
+	filePath := getConfigPath()
 
-	data, err := os.ReadFile(filePath)
+	config, err := loadConfig(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erro ao ler %s: %v\n", filePath, err)
 		fmt.Fprintf(os.Stderr, "\nUse --init para criar arquivo de exemplo, ou --config para especificar outro caminho.\n")
-		os.Exit(1)
-	}
-
-	var config Config
-	if err := json.Unmarshal(data, &config); err != nil {
-		fmt.Fprintf(os.Stderr, "Erro ao decodificar JSON: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -167,9 +220,11 @@ func main() {
 	}
 
 	if updated {
-		out, _ := json.MarshalIndent(config, "", "  ")
-		os.WriteFile(filePath, out, 0644)
-		fmt.Printf("📁 Config atualizado: %s\n", filePath)
+		if err := saveConfig(filePath, config); err != nil {
+			fmt.Fprintf(os.Stderr, "Erro ao salvar config: %v\n", err)
+		} else {
+			fmt.Printf("📁 Config atualizado: %s\n", filePath)
+		}
 	}
 }
 
@@ -203,13 +258,7 @@ func createExampleConfig() {
 		},
 	}
 
-	out, err := json.MarshalIndent(exampleConfig, "", "  ")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro ao criar config: %v\n", err)
-		os.Exit(1)
-	}
-
-	if err := os.WriteFile(filePath, out, 0644); err != nil {
+	if err := saveConfig(filePath, &exampleConfig); err != nil {
 		fmt.Fprintf(os.Stderr, "Erro ao salvar config: %v\n", err)
 		os.Exit(1)
 	}
@@ -217,8 +266,7 @@ func createExampleConfig() {
 	fmt.Printf("✅ Arquivo de configuração criado: %s\n", filePath)
 	fmt.Println("\nPróximos passos:")
 	fmt.Println("  1. Encode sua API key: zai-keycheck --encode SUA_API_KEY")
-	fmt.Println("  2. Edite o arquivo e adicione em api_key ou api_key_base64")
-	fmt.Println("  3. Execute: zai-keycheck")
+	fmt.Println("  2. Execute: zai-keycheck")
 }
 
 func printHelp() {
@@ -229,7 +277,7 @@ func printHelp() {
 	fmt.Println("  -config string")
 	fmt.Println("      Caminho do arquivo de configuração (padrão: ~/.config/zai-keycheck/providers.json)")
 	fmt.Println("  -encode string")
-	fmt.Println("      Codifica uma API key em base64")
+	fmt.Println("      Codifica uma API key e salva na config")
 	fmt.Println("  -init")
 	fmt.Println("      Cria arquivo de configuração de exemplo")
 	fmt.Println("  -help")
@@ -238,7 +286,7 @@ func printHelp() {
 	fmt.Println("  zai-keycheck --init")
 	fmt.Println("      Cria arquivo de configuração padrão em ~/.config/zai-keycheck/providers.json")
 	fmt.Println("  zai-keycheck --encode SUA_API_KEY")
-	fmt.Println("      Codifica a API key em base64 para usar no config (mais seguro)\n")
+	fmt.Println("      Codifica a API key em base64 e salva no arquivo de config\n")
 	fmt.Println("ARQUIVO DE CONFIGURAÇÃO:")
 	fmt.Println("  Padrão: ~/.config/zai-keycheck/providers.json")
 	fmt.Println("  Use api_key (texto) ou api_key_base64 (codificado):")
@@ -247,8 +295,8 @@ func printHelp() {
   "providers": [
     {
       "url": "https://api.z.ai/api/monitor/usage/quota/limit",
-      "available_at": "2026-03-29T18:45:30Z",
-      "last_attempt": "2026-03-29T16:45:30Z"
+      "available_at": "",
+      "last_attempt": ""
     }
   ]
 }`)
