@@ -81,18 +81,6 @@ func getConfigPath() string {
 func loadConfig(filePath string) (*Config, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return &Config{
-				APIKeyBase64: "",
-				Providers: []Provider{
-					{
-						URL:         "https://api.z.ai/api/monitor/usage/quota/limit",
-						AvailableAt: "",
-						LastAttempt: "",
-					},
-				},
-			}, nil
-		}
 		return nil, err
 	}
 
