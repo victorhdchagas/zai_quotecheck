@@ -70,6 +70,24 @@ zai_quotecheck --init
 This creates an example config file at `~/.config/zai_quotecheck/providers.json`.
 
 For manual editing, the config supports `api_key` (plain text) or `api_key_base64` (base64 encoded).
+
+### Environment Variable (Priority over config file)
+
+The API key can be set via environment variable, which has priority over config file:
+
+```bash
+export ZAI_API_KEY=your-api-key-here
+zai_quotecheck
+```
+
+This is useful for Docker or CI/CD environments.
+
+### Check quota
+
+```bash
+zai_quotecheck                    # uses default config
+zai_quotecheck -c ./config.json  # uses custom file
+zai_quotecheck --help             # shows help
 ```
 
 ### Check quota
@@ -115,6 +133,17 @@ docker build -t zai_quotecheck .
 ```bash
 docker run --rm \
   -v ~/.config/zai_quotecheck:/root/.config/zai_quotecheck \
+  -e ZAI_API_KEY=your-api-key-here \
+  -e TZ=America/Sao_Paulo \
+  zai_quotecheck
+```
+
+Or set via environment variable:
+```bash
+export ZAI_API_KEY=your-api-key-here
+docker run --rm \
+  -v ~/.config/zai_quotecheck:/root/.config/zai_quotecheck \
+  -e ZAI_API_KEY \
   -e TZ=America/Sao_Paulo \
   zai_quotecheck
 ```
@@ -122,6 +151,12 @@ docker run --rm \
 ### Docker Compose
 
 ```bash
+ZAI_API_KEY=your-api-key-here docker-compose run --rm zai_quotecheck
+```
+
+Or set in `.env` file (recommended):
+```bash
+echo "ZAI_API_KEY=your-api-key-here" > .env
 docker-compose run --rm zai_quotecheck
 ```
 

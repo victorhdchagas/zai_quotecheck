@@ -144,29 +144,49 @@ func main() {
 		return
 	}
 
-	filePath := getConfigPath()
+	var filePath string
+	var config *Config
 
-	config, err := loadConfig(filePath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro ao ler %s: %v\n", filePath, err)
-		fmt.Fprintf(os.Stderr, "\nUse --init para criar arquivo de exemplo, ou --config para especificar outro caminho.\n")
-		os.Exit(1)
-	}
+	apiKey := os.Getenv("ZAI_API_KEY")
+	if apiKey == "" {
+		filePath = getConfigPath()
 
-	apiKey := config.APIKey
-	if apiKey == "" && config.APIKeyBase64 != "" {
-		decoded, err := base64.StdEncoding.DecodeString(config.APIKeyBase64)
+		var err error
+		config, err = loadConfig(filePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao decodificar api_key_base64: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Erro ao ler %s: %v\n", filePath, err)
+			fmt.Fprintf(os.Stderr, "\nUse --init para criar arquivo de exemplo, ou --config para especificar outro caminho.\n")
 			os.Exit(1)
 		}
-		apiKey = string(decoded)
+
+		apiKey = config.APIKey
+		if apiKey == "" && config.APIKeyBase64 != "" {
+			decoded, err := base64.StdEncoding.DecodeString(config.APIKeyBase64)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Erro ao decodificar api_key_base64: %v\n", err)
+				os.Exit(1)
+			}
+			apiKey = string(decoded)
+		}
+
+		if apiKey == "" {
+			fmt.Fprintln(os.Stderr, "api_key ou api_key_base64 não definida no JSON.")
+			fmt.Fprintln(os.Stderr, "Use: zai_quotecheck --encode SUA_API_KEY")
+			fmt.Fprintln(os.Stderr, "Ou defina ZAI_API_KEY como variável de ambiente.")
+			os.Exit(1)
+		}
 	}
 
-	if apiKey == "" {
-		fmt.Fprintln(os.Stderr, "api_key ou api_key_base64 não definida no JSON.")
-		fmt.Fprintln(os.Stderr, "Use: zai_quotecheck --encode SUA_API_KEY")
-		os.Exit(1)
+	if apiKey != "" {
+		config = &Config{
+			Providers: []Provider{
+				{
+					URL:         "https://api.z.ai/api/monitor/usage/quota/limit",
+					AvailableAt: "",
+					LastAttempt: "",
+				},
+			},
+		}
 	}
 
 	if len(config.Providers) == 0 {
@@ -207,7 +227,7 @@ func main() {
 		}
 	}
 
-	if updated {
+	if updated && filePath != "" {
 		if err := saveConfig(filePath, config); err != nil {
 			fmt.Fprintf(os.Stderr, "Erro ao salvar config: %v\n", err)
 		} else {
@@ -277,7 +297,10 @@ func printHelp() {
 	fmt.Println("      Codifica a API key em base64 e salva no arquivo de config\n")
 	fmt.Println("ARQUIVO DE CONFIGURAÇÃO:")
 	fmt.Println("  Padrão: ~/.config/zai_quotecheck/providers.json")
-	fmt.Println("  Use api_key (texto) ou api_key_base64 (codificado):")
+	fmt.Println("  API key pode ser definida de 3 formas (em ordem de prioridade):")
+	fmt.Println("    1. Variável de ambiente: ZAI_API_KEY")
+	fmt.Println("    2. api_key (texto no arquivo de config)")
+	fmt.Println("    3. api_key_base64 (base64 no arquivo de config)")
 	fmt.Println(`{
   "api_key_base64": "MTQ5NjNiYjMzMWI4NGJkNzg0ZTcxYWM3NzMxY2MzNzEuVm05bEF2Y1ZrZldVTGhoYw==",
   "providers": [

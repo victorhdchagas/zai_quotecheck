@@ -9,3 +9,4 @@ services:
       - ${HOME}/.config/zai_quotecheck:/root/.config/zai_quotecheck
     environment:
       - TZ=America/Sao_Paulo
+      - ZAI_API_KEY=${ZAI_API_KEY}
