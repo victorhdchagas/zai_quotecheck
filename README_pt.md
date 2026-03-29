@@ -1,0 +1,112 @@
+# zai-keycheck
+
+Verificador de quota da Z.AI para GLM Coding Plan.
+
+## Sobre
+
+Monitora sua quota da API Z.AI, verificando o uso de TIME_LIMIT e TOKENS_LIMIT com reset automático. Suporta múltiplos providers e armazena a API key codificada em base64 para segurança.
+
+## Recursos
+
+- ✅ Verifica TIME_LIMIT (requisições por janela de tempo)
+- ✅ Verifica TOKENS_LIMIT (limite de tokens)
+- ✅ Converte timestamps para sua timezone local
+- ✅ Múltiplos providers no mesmo arquivo de config
+- ✅ API key em base64 para segurança (opcional)
+- ✅ Atualiza automaticamente `last_attempt` no config
+- ✅ Configuração padrão em `~/.config/zai-keycheck/`
+
+## Instalação
+
+### Via Go (recomendado)
+
+```bash
+go install github.com/seu-usuario/zai-keycheck@latest
+```
+
+### Manual
+
+```bash
+git clone https://github.com/seu-usuario/zai-keycheck.git
+cd zai-keycheck
+go build
+mv zai-keycheck ~/.local/bin/  # ou ~/go/bin/
+```
+
+## Uso
+
+### Primeiro uso
+
+1. Encode sua API key em base64:
+```bash
+zai-keycheck --encode SUA_API_KEY
+```
+
+2. Crie o arquivo de configuração em `~/.config/zai-keycheck/providers.json`:
+
+```json
+{
+  "api_key_base64": "sua-key-codificada-em-base64",
+  "providers": [
+    {
+      "url": "https://api.z.ai/api/monitor/usage/quota/limit",
+      "available_at": "",
+      "last_attempt": ""
+    }
+  ]
+}
+```
+
+Ou use `api_key` em texto:
+```json
+{
+  "api_key": "sk-sua-chave-aqui",
+  "providers": [...]
+}
+```
+
+### Verificar quota
+
+```bash
+zai-keycheck                    # usa config padrão
+zai-keycheck -c ./config.json  # usa arquivo customizado
+zai-keycheck --help             # mostra ajuda
+```
+
+### Saída de exemplo
+
+```
+🔗 https://api.z.ai/api/monitor/usage/quota/limit
+
+   📊 Plano: lite
+
+   ⏱️  TIME_LIMIT (1 req / 5 min)
+      Usadas: 100 | Restantes: 100 | 0%
+      Por modelo:
+        - search-prime: 0
+        - web-reader: 0
+        - zread: 0
+      🔄 Reseta em: 112h 2m 30s (02/04/2026 22:37:15)
+
+   🪙 TOKENS_LIMIT (5 req / 3 h)
+      Uso: 1%
+      🔄 Reseta em: 3h 58m 14s (29/03/2026 10:32:59)
+
+📁 Config atualizado: /home/wutachi/.config/zai-keycheck/providers.json
+```
+
+## Segurança
+
+A API key pode ser armazenada de duas formas:
+
+1. **api_key** — texto plano (recomendado apenas para desenvolvimento)
+2. **api_key_base64** — codificada em base64 (recomendado para produção/compartilhamento)
+
+Use `api_key_base64` quando:
+- Compartilhar o arquivo de config
+- Commitar no Git
+- Armazenar em backup
+
+## Licença
+
+MIT - ver arquivo [LICENSE](LICENSE) para detalhes.
