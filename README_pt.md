@@ -21,13 +21,13 @@ Monitora sua quota da API Z.AI, verificando o uso de TIME_LIMIT e TOKENS_LIMIT c
 ### Via Go (recomendado)
 
 ```bash
-go install github.com/seu-usuario/zai-keycheck@latest
+go install github.com/victorhdchagas/zai-keycheck@latest
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/seu-usuario/zai-keycheck.git
+git clone https://github.com/victorhdchagas/zai-keycheck.git
 cd zai-keycheck
 go build
 mv zai-keycheck ~/.local/bin/  # ou ~/go/bin/
